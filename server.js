@@ -11,7 +11,7 @@ redisClient.on('ready', () => {
 })
 redisClient.on('error', (err) => {
     console.log('error' + err)
-});   
+});
 
 app.use( bodyParser.json())
 app.use(bodyParser.urlencoded({
@@ -37,20 +37,24 @@ app.listen(3000, function () {
     let queryParams = [redisKey, 0, currTimestamp]
 
     // get the messages with timestamp between 0 and current timestamp
-    redisClient.ZRANGEBYSCORE(queryParams, (err, response) => {
+    redisClient.ZRANGEBYSCORE(queryParams, (err, getResponse) => {
       if (err) {
         throw err
       }
 
-      // log the messages
-      response.forEach(message => {
-        console.log(message)
-      })
-
       // delete the messages
-      redisClient.ZREMRANGEBYSCORE(queryParams, (err, response) => {
+      redisClient.ZREMRANGEBYSCORE(queryParams, (err, deleteResponse) => {
         if (err) {
           throw err
+        }
+
+        // support load balancing: only if the messages were deleted from
+        // this machine, then print them
+        if (deleteResponse === getResponse.length) {
+          // log the messages
+          getResponse.forEach(message => {
+            console.log(message)
+          })
         }
       })
     })
