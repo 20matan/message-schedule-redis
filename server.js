@@ -11,7 +11,7 @@ redisClient.on('ready', () => {
 })
 redisClient.on('error', (err) => {
     console.log('error' + err)
-});
+});   
 
 app.use( bodyParser.json())
 app.use(bodyParser.urlencoded({
